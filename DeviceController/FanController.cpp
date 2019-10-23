@@ -25,6 +25,9 @@ void FanController::update() {
 }
 
 void FanController::setSpeed(uint8_t motorIndex, uint8_t speed) {
+  speed = constrain(speed, 0, 9);
+  speed = map(speed, 0, 9, 0, 255);
+  
   if (speed==0) {
     fan1->run(RELEASE);
   } else {

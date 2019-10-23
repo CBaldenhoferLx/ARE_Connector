@@ -2,15 +2,18 @@
 #include <TaskManager.h>
 
 #include "FanController.h"
+#include "CommController.h"
 
 TaskManager taskManager;
 
 FanController fanController;
+CommController commController;
 
 void setup() {
-  LOG_INIT();
+  //LOG_INIT();
 
   taskManager.registerTask(&fanController);
+  taskManager.registerTask(&commController);
   
   taskManager.init();
 }
