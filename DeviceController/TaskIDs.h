@@ -1,0 +1,2 @@
+#define LED_CONTROLLER 0
+#define NETWORK_CONTROLLER 1
