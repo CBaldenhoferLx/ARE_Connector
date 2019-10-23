@@ -12,7 +12,6 @@ CommController::CommController() : AbstractTask() {
 
 void CommController::init() {
   COMM_SERIAL.begin(SERIAL_SPEED);
-  COMM_SERIAL.println("INIT");
 }
 
 void CommController::update() {
@@ -21,7 +20,7 @@ void CommController::update() {
   if (c==DATAGRAM_START) {
     COMM_SERIAL.read();
     currentData = "";
-    LOG_PRINTLN("START");
+    //LOG_PRINTLN("START");
   } else if (c==DATAGRAM_END) {
     COMM_SERIAL.read();
     handlePackage();
@@ -29,11 +28,11 @@ void CommController::update() {
   } else if (c=='\n' || c=='\r') {
     COMM_SERIAL.read();
     currentData = "";
-    LOG_PRINTLN("RESET");
+    //LOG_PRINTLN("RESET");
   } else if (c>0) {
     char b = COMM_SERIAL.read();
     currentData+=b;
-    LOG_PRINTLN("DATA");
+    //LOG_PRINTLN("DATA");
   }
 }
 

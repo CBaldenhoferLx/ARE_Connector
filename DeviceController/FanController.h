@@ -5,11 +5,11 @@
 
 #include <AFMotor.h>
 
-#include "AbstractTask.h"
+#include "AbstractIdleTask.h"
 
 #define FAN_MOTOR_COUNT 3
 
-class FanController : public AbstractTask {
+class FanController : public AbstractIdleTask {
 public:
   FanController();
 

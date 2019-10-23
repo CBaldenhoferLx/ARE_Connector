@@ -4,18 +4,11 @@
 
 #include "TaskIDs.h"
 
-FanController::FanController() : AbstractTask() {
+FanController::FanController() : AbstractIdleTask() {
 }
 
 void FanController::init() {
-  //motorShield = new Adafruit_MotorShield();
-  
-  //motorShield->begin();
-  
-  LOG_PRINTLN("INIT");
-
-  //fan1 = motorShield->getMotor(1);
-  //fan1->run(RELEASE);
+  //LOG_PRINTLN("INIT");
 
   for (uint8_t i=0;i<FAN_MOTOR_COUNT;i++) {
     fans[i] = new AF_DCMotor(1+i);
@@ -25,11 +18,6 @@ void FanController::init() {
 }
 
 void FanController::update() {
-  /*
-  for (uint8_t i=0;i<FAN_MOTOR_COUNT;i++) {
-    fans[i]->run(FORWARD);
-    fans[i]->setSpeed(fan_speeds[i]);
-  }*/
 }
 
 void FanController::setSpeed(uint8_t motorIndex, uint8_t speed) {
