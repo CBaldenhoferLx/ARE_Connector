@@ -1,7 +1,9 @@
 #ifndef FANCONTROLLER_H
 #define FANCONTROLLER_H
 
-#include <Adafruit_MotorShield.h>
+//#include <Adafruit_MotorShield.h>
+
+#include <AFMotor.h>
 
 #include "AbstractIntervalTask.h"
 
@@ -16,9 +18,11 @@ public:
   void setSpeed(uint8_t motorIndex, uint8_t speed);
 
 private:
-  Adafruit_MotorShield *motorShield;
+  //Adafruit_MotorShield *motorShield;
 
-  Adafruit_DCMotor *fan1;
+  //Adafruit_DCMotor *fan1;
+
+  AF_DCMotor *fan1;
   
 };
 
