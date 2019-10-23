@@ -22,7 +22,10 @@ SOURCES += \
     serialconnector.cpp \
     protocol.cpp \
     keyfilter.cpp \
-    orchestrator.cpp
+    orchestrator.cpp \
+    ultrahapticsconnector.cpp \
+    LeapC++.cpp \
+    LeapImplementationC++.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -35,4 +38,35 @@ HEADERS += \
     protocol.h \
     keyfilter.h \
     orchestrator.h \
-    datareceiver.h
+    datareceiver.h \
+    ultrahapticsconnector.h \
+    LeapC++.h \
+    LeapMath.h \
+    LeapImplementationC++.h
+
+#win32: LIBS += -L$$PWD/'../../../../../Program Files/Ultrahaptics/lib/' -lUltrahaptics
+#
+#INCLUDEPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+#DEPENDPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+#
+#win32: LIBS += -L$$PWD/'../../../../../Program Files/Ultrahaptics/lib/' -llibusb-1.0
+#
+#INCLUDEPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+#DEPENDPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+
+win32: LIBS += -L$$PWD/'../../../../../Program Files/Ultrahaptics/lib/' -lUltrahaptics
+
+INCLUDEPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+DEPENDPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/'../../../../../Program Files/Ultrahaptics/lib/Ultrahaptics.lib'
+else:win32-g++: PRE_TARGETDEPS += $$PWD/'../../../../../Program Files/Ultrahaptics/lib/libUltrahaptics.a'
+
+
+win32: LIBS += -L$$PWD/LeapSDK/lib/x64/ -lLeapC
+
+INCLUDEPATH += $$PWD/LeapSDK/include
+DEPENDPATH += $$PWD/LeapSDK/include
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/LeapSDK/lib/x64/LeapC.lib
+else:win32-g++: PRE_TARGETDEPS += $$PWD/LeapSDK/lib/x64/libLeapC.a

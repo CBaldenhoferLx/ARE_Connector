@@ -7,6 +7,14 @@
 #define DATAGRAM_SEP ","
 #define DATAGRAM_END ";"
 
+/*
+ * SET TOUCH MAX
+ * @2,5;
+ *
+ * SET TOUCH OFF
+ * @2,0;
+*/
+
 class Protocol : public QObject
 {
     Q_OBJECT

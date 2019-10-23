@@ -51,7 +51,7 @@ void Orchestrator::onDataReceived(Protocol::ProtocolAction action) {
         redirectMessage(Protocol::SENDER_ARDUINO_SERIAL, action);
         break;
     case Protocol::ACTION_TOUCH_TRIGGERED:
-        redirectMessage(Protocol::SENDER_ML_UDP, action);
+        redirectMessage(Protocol::SENDER_UL_LIB, action);
         break;
     default:
         qWarning() << "Action not handled yet";
