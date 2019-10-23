@@ -12,8 +12,8 @@ CommController commController;
 void setup() {
   //LOG_INIT();
 
-  taskManager.registerTask(&fanController);
   taskManager.registerTask(&commController);
+  taskManager.registerTask(&fanController);
   
   taskManager.init();
 }

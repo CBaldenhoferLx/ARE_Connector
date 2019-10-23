@@ -5,9 +5,11 @@
 
 #include <AFMotor.h>
 
-#include "AbstractIntervalTask.h"
+#include "AbstractTask.h"
 
-class FanController : public AbstractIntervalTask {
+#define FAN_MOTOR_COUNT 3
+
+class FanController : public AbstractTask {
 public:
   FanController();
 
@@ -20,10 +22,8 @@ public:
 private:
   //Adafruit_MotorShield *motorShield;
 
-  //Adafruit_DCMotor *fan1;
+  AF_DCMotor *fans[FAN_MOTOR_COUNT];
 
-  AF_DCMotor *fan1;
-  
 };
 
 
