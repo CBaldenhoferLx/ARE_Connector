@@ -19,7 +19,7 @@ void Orchestrator::handleKeyPressed(unsigned long key) {
         qDebug() << "Emitting Set Fan";
 
         a.param = 0;
-        a.action = Protocol::ACTION_SET_FAN;
+        a.action = Protocol::ACTION_SET_FAN_LEFT;
         a.sender = Protocol::SENDER_ML_UDP;
 
         onDataReceived(a);
@@ -47,7 +47,9 @@ void Orchestrator::onDataReceived(Protocol::ProtocolAction action) {
     qDebug() << Q_FUNC_INFO << action.action;
 
     switch(action.action) {
-    case Protocol::ACTION_SET_FAN:
+    case Protocol::ACTION_SET_FAN_LEFT:
+    case Protocol::ACTION_SET_FAN_MID:
+    case Protocol::ACTION_SET_FAN_RIGHT:
         redirectMessage(Protocol::SENDER_ARDUINO_SERIAL, action);
         break;
     case Protocol::ACTION_TOUCH_TRIGGERED:

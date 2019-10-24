@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    appconfig.cpp \
         main.cpp \
     udpconnector.cpp \
     serialconnector.cpp \
@@ -33,6 +34,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    appconfig.h \
     udpconnector.h \
     serialconnector.h \
     protocol.h \
@@ -54,13 +56,13 @@ HEADERS += \
 #INCLUDEPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
 #DEPENDPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
 
-win32: LIBS += -L$$PWD/'../../../../../Program Files/Ultrahaptics/lib/' -lUltrahaptics
+win32: LIBS += -L'C:/Program Files/Ultrahaptics/lib/' -lUltrahaptics
 
-INCLUDEPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
-DEPENDPATH += $$PWD/'../../../../../Program Files/Ultrahaptics/include'
+INCLUDEPATH += 'C:/Program Files/Ultrahaptics/include'
+DEPENDPATH += 'C:/Program Files/Ultrahaptics/include'
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/'../../../../../Program Files/Ultrahaptics/lib/Ultrahaptics.lib'
-else:win32-g++: PRE_TARGETDEPS += $$PWD/'../../../../../Program Files/Ultrahaptics/lib/libUltrahaptics.a'
+win32:!win32-g++: PRE_TARGETDEPS += 'C:/Program Files/Ultrahaptics/lib/Ultrahaptics.lib'
+else:win32-g++: PRE_TARGETDEPS += 'C:/Program Files/Ultrahaptics/lib/libUltrahaptics.a'
 
 
 win32: LIBS += -L$$PWD/LeapSDK/lib/x64/ -lLeapC

@@ -5,14 +5,19 @@
 
 #include "protocol.h"
 
-UDPConnector::UDPConnector(QObject *parent) : DataReceiver (parent)
+UDPConnector::UDPConnector(AppConfig *appConfig, QObject *parent) : DataReceiver (parent)
 {
+    m_receive_port = appConfig->getValue("UDP_RECEIVE_PORT", 7755).toUInt();
+
+    m_send_host = appConfig->getValue("UDP_SEND_HOST", "172.30.90.117").toString();
+    m_send_port = appConfig->getValue("UDP_SEND_PORT", 7766).toUInt();
+
     initSocket();
 }
 
 void UDPConnector::sendData(Protocol::ProtocolAction action) {
     qDebug() << Q_FUNC_INFO;
-    udpSocket->writeDatagram(Protocol::serializeAction(action).toLatin1(), QHostAddress("172.30.90.117"), 7766);
+    udpSocket->writeDatagram(Protocol::serializeAction(action).toLatin1(), QHostAddress(m_send_host), m_send_port);
 }
 
 void UDPConnector::initSocket()
@@ -20,7 +25,7 @@ void UDPConnector::initSocket()
     qDebug() << Q_FUNC_INFO;
 
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::Any, 7755);
+    udpSocket->bind(QHostAddress::Any, m_receive_port);
 
     connect(udpSocket, &QUdpSocket::readyRead,
             this, &UDPConnector::readPendingDatagrams);

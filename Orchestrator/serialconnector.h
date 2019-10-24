@@ -5,13 +5,14 @@
 #include <QSerialPort>
 #include <QTimer>
 
+#include "appconfig.h"
 #include "datareceiver.h"
 
 class SerialConnector : public DataReceiver
 {
     Q_OBJECT
 public:
-    explicit SerialConnector(QObject *parent = nullptr);
+    explicit SerialConnector(AppConfig *appConfig, QObject *parent = nullptr);
 
     void sendData(Protocol::ProtocolAction action);
 

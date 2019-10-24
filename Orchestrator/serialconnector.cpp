@@ -4,13 +4,13 @@
 
 #include "protocol.h"
 
-SerialConnector::SerialConnector(QObject *parent) : DataReceiver(parent)
+SerialConnector::SerialConnector(AppConfig *appConfig, QObject *parent) : DataReceiver(parent)
 {
     connect(&m_port, &QSerialPort::errorOccurred, this, &SerialConnector::onErrorOccurred);
     connect(&m_port, &QSerialPort::readyRead, this, &SerialConnector::onReadRead);
 
-    m_port.setPortName("COM22");
-    m_port.setBaudRate(9600);
+    m_port.setPortName(appConfig->getValue("SERIAL_PORT", "COM22").toString());
+    m_port.setBaudRate(appConfig->getValue("SERIAL_BAUDRATE", 9600).toInt());
 
     tryConnect();
 }
@@ -19,7 +19,10 @@ void SerialConnector::sendData(Protocol::ProtocolAction action) {
     qDebug() << Q_FUNC_INFO;
 
     if (m_port.isWritable()) {
-        m_port.write(Protocol::serializeAction(action).toLatin1());
+        QByteArray data = Protocol::serializeAction(action).toLatin1();
+        qDebug() << "Writing serial data" << data;
+        qint64 bytesWritten = m_port.write(data);
+        qDebug() << "Written:" << bytesWritten;
     } else {
         qWarning() << "Cannot write to serial port";
     }

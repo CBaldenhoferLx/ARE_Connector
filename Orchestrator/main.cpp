@@ -6,16 +6,20 @@
 #include "ultrahapticsconnector.h"
 #include "orchestrator.h"
 
+#include "appconfig.h"
+
 int main(int argc, char *argv[])
 {
     qDebug() << Q_FUNC_INFO;
 
     QCoreApplication a(argc, argv);
 
+    AppConfig appConfig;
+
     Orchestrator orch;
 
-    UDPConnector udpConn;
-    SerialConnector serialConn;
+    UDPConnector udpConn(&appConfig);
+    SerialConnector serialConn(&appConfig);
     UltrahapticsConnector uhConn;
 
     uhConn.start();
