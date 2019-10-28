@@ -44,7 +44,7 @@ void Orchestrator::addReceiver(Protocol::Senders sender, DataReceiver *receiver)
 }
 
 void Orchestrator::onDataReceived(Protocol::ProtocolAction action) {
-    qDebug() << Q_FUNC_INFO << action.action;
+    qDebug() << Q_FUNC_INFO << action.action << action.param;
 
     switch(action.action) {
     case Protocol::ACTION_SET_FAN_LEFT:

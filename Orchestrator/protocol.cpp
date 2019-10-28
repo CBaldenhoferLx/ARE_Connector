@@ -13,7 +13,15 @@ Protocol::ProtocolAction Protocol::parseMessage(Senders sender, QString data) {
 
     action.sender = sender;
 
-    if (data.startsWith(DATAGRAM_START)) {
+    int s = data.indexOf(DATAGRAM_START);
+
+    if (s>=0) {
+        if (s>0) {
+            //qDebug() << "Removing trash" << s;
+            data = data.mid(s);
+            //qDebug() << "Cleaned: " << data;
+        }
+
         int i = data.indexOf(DATAGRAM_SEP);
 
         if (i>=0) {
@@ -23,21 +31,25 @@ Protocol::ProtocolAction Protocol::parseMessage(Senders sender, QString data) {
             if (actionId<ACTION_MAX && actionId>0) {
                 int o = data.indexOf(DATAGRAM_END, i);
 
-                double param = data.mid(i+1, o-i-1).toDouble();
+                if (o>i) {
+                    double param = data.mid(i+1, o-i-1).toDouble();
 
-                qDebug() << param;
+                    qDebug() << param;
 
-                action.action = static_cast<Protocol::PAction>(actionId);
-                action.param = param;
-                action.isValid = true;
+                    action.action = static_cast<Protocol::PAction>(actionId);
+                    action.param = param;
+                    action.isValid = true;
+                } else {
+                    //qWarning() << "No datagram terminator";
+                }
             } else {
-                qWarning() << "Invalid actionId" << actionId;
+                //qWarning() << "Invalid actionId" << actionId;
             }
         } else {
-            qWarning() << "Datagram corrupted";
+            //qWarning() << "Datagram corrupted";
         }
     } else {
-        qWarning() << "Missing datagram header";
+        //qWarning() << "Missing datagram header";
     }
 
     return action;

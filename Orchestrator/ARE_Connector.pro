@@ -1,6 +1,7 @@
 QT -= gui
 QT += network
 QT += serialport
+QT += concurrent
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -19,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     appconfig.cpp \
         main.cpp \
+    serialhandler.cpp \
     udpconnector.cpp \
     serialconnector.cpp \
     protocol.cpp \
@@ -35,6 +37,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     appconfig.h \
+    serialhandler.h \
     udpconnector.h \
     serialconnector.h \
     protocol.h \

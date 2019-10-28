@@ -25,7 +25,12 @@ void UDPConnector::initSocket()
     qDebug() << Q_FUNC_INFO;
 
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::Any, m_receive_port);
+    if (udpSocket->bind(QHostAddress::Any, m_receive_port)) {
+        qDebug() << "Listening on UDP" << m_receive_port;
+    } else {
+        qWarning() << "Failed to bind to UDP" << m_receive_port;
+    }
+
 
     connect(udpSocket, &QUdpSocket::readyRead,
             this, &UDPConnector::readPendingDatagrams);
