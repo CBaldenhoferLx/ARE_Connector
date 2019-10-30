@@ -1,0 +1,7 @@
+{
+	"BuildId": "",
+	"Modules": 
+	{
+		"SocketClient": "UE4Editor-SocketClient.dll"
+	}
+}

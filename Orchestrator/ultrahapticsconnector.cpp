@@ -59,6 +59,7 @@ void UltrahapticsConnector::my_emitter_callback(const Ultrahaptics::TimePointStr
         // Set the position and intensity of the persistent control point to that of the modulated wave at this point in time.
         sample.persistentControlPoint(0).setPosition(circle->offset + position);
         sample.persistentControlPoint(0).setIntensity(circle->intensity);
+
         if (circle->enable) {
             sample.persistentControlPoint(0).enable();
         } else {
@@ -105,13 +106,14 @@ void UltrahapticsConnector::runLoop() {
     {
         if (m_buttonStrength>0) {
             // Get all the hand positions from the leap and position a focal point on each.
+
             Leap::HandList hands = leap_controller.frame().hands();
             Leap::Finger indexFinger;
 
             if (!hands.isEmpty()) {
                 Leap::FingerList theFingers = hands.frontmost().fingers().extended();
 
-                qDebug() << "Fingers:" << theFingers.count();
+                qDebug() << "Fingers:" << theFingers.count() << "confidence" << hands.frontmost().confidence();
 
                 for(Leap::FingerList::const_iterator fl = theFingers.begin(); fl != theFingers.end(); fl++) {
                     const Leap::Finger finger = *fl;
