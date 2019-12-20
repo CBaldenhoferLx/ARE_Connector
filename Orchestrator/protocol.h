@@ -15,29 +15,29 @@
  * @2,0;
 */
 
-class Protocol : public QObject
+class SerialProtocol : public QObject
 {
     Q_OBJECT
 
 public:
     enum Senders { SENDER_ML_UDP, SENDER_ARDUINO_SERIAL, SENDER_UL_LIB, SENDER_MAX };
-    enum PAction { ACTION_NONE, ACTION_SET_FAN_LEFT, ACTION_SET_FAN_MID, ACTION_SET_FAN_RIGHT, ACTION_TOUCH_TRIGGERED, ACTION_MAX };
+    enum PAction { ACTION_NONE, ACTION_SET_FAN_LEFT, ACTION_SET_FAN_MID, ACTION_SET_FAN_RIGHT, ACTION_TOUCH_TRIGGERED, ACTION_SCAN_ENABLED, ACTION_MAX };
 
     Q_ENUM(Senders)
     Q_ENUM(PAction)
 
-    struct ProtocolAction {
+    struct SerialProtocolAction {
         Senders sender;
         bool isValid = false;
         PAction action = ACTION_NONE;
         double param = 0.0;
     };
 
-    explicit Protocol(QObject *parent = nullptr);
+    explicit SerialProtocol(QObject *parent = nullptr);
 
-    static ProtocolAction parseMessage(Senders sender, QString data);
+    static SerialProtocolAction parseMessage(Senders sender, QString data);
 
-    static QString serializeAction(ProtocolAction action);
+    static QString serializeAction(SerialProtocolAction action);
 
 signals:
 

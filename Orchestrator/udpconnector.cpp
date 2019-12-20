@@ -15,9 +15,9 @@ UDPConnector::UDPConnector(AppConfig *appConfig, QObject *parent) : DataReceiver
     initSocket();
 }
 
-void UDPConnector::sendData(Protocol::ProtocolAction action) {
+void UDPConnector::sendData(SerialProtocol::SerialProtocolAction action) {
     qDebug() << Q_FUNC_INFO;
-    udpSocket->writeDatagram(Protocol::serializeAction(action).toLatin1(), QHostAddress(m_send_host), m_send_port);
+    udpSocket->writeDatagram(SerialProtocol::serializeAction(action).toLatin1(), QHostAddress(m_send_host), m_send_port);
 }
 
 void UDPConnector::initSocket()
@@ -49,7 +49,7 @@ void UDPConnector::readPendingDatagrams()
 void UDPConnector::processDatagram(QNetworkDatagram &datagram) {
     qDebug() << Q_FUNC_INFO << datagram.data();
 
-    Protocol::ProtocolAction action = Protocol::parseMessage(Protocol::SENDER_ML_UDP, datagram.data());
+    SerialProtocol::SerialProtocolAction action = SerialProtocol::parseMessage(SerialProtocol::SENDER_ML_UDP, datagram.data());
     if (action.isValid) {
         Q_EMIT(dataReceived(action));
     } else {

@@ -1,15 +1,15 @@
 #include "protocol.h"
 #include <QDebug>
 
-Protocol::Protocol(QObject *parent) : QObject(parent)
+SerialProtocol::SerialProtocol(QObject *parent) : QObject(parent)
 {
 
 }
 
-Protocol::ProtocolAction Protocol::parseMessage(Senders sender, QString data) {
+SerialProtocol::SerialProtocolAction SerialProtocol::parseMessage(Senders sender, QString data) {
     qDebug() << Q_FUNC_INFO << sender << data;
 
-    ProtocolAction action;
+    SerialProtocolAction action;
 
     action.sender = sender;
 
@@ -36,7 +36,7 @@ Protocol::ProtocolAction Protocol::parseMessage(Senders sender, QString data) {
 
                     qDebug() << param;
 
-                    action.action = static_cast<Protocol::PAction>(actionId);
+                    action.action = static_cast<SerialProtocol::PAction>(actionId);
                     action.param = param;
                     action.isValid = true;
                 } else {
@@ -55,6 +55,6 @@ Protocol::ProtocolAction Protocol::parseMessage(Senders sender, QString data) {
     return action;
 }
 
-QString Protocol::serializeAction(ProtocolAction action) {
+QString SerialProtocol::serializeAction(SerialProtocolAction action) {
     return DATAGRAM_START + QString::number(action.action) + DATAGRAM_SEP + QString::number(action.param) + DATAGRAM_END;
 }

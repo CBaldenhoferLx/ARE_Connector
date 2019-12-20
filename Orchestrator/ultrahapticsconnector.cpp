@@ -21,11 +21,11 @@ void UltrahapticsConnector::stop() {
     if (m_future.isRunning()) m_future.cancel();
 }
 
-void UltrahapticsConnector::sendData(Protocol::ProtocolAction action) {
+void UltrahapticsConnector::sendData(SerialProtocol::SerialProtocolAction action) {
     qDebug() << Q_FUNC_INFO << action.action;
 
     switch(action.action) {
-    case Protocol::ACTION_TOUCH_TRIGGERED:
+    case SerialProtocol::ACTION_TOUCH_TRIGGERED:
         double v = qBound(BUTTON_STRENGTH_OFF, action.param, BUTTON_STRENGTH_FULL);
         m_buttonStrength = v;
         break;
@@ -38,7 +38,11 @@ void UltrahapticsConnector::setButtonStrength(quint8 strength) {
     m_buttonStrength = strength;
 }
 
+void UltrahapticsConnector::setScanEnabled(bool enabled) {
+    qDebug() << Q_FUNC_INFO << enabled;
 
+    m_scanEnabled = enabled;
+}
 
 // Callback function for filling out complete device output states through time
 void UltrahapticsConnector::my_emitter_callback(const Ultrahaptics::TimePointStreaming::Emitter &timepoint_emitter,

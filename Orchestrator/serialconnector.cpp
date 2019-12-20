@@ -22,7 +22,7 @@ SerialConnector::SerialConnector(AppConfig *appConfig, QObject *parent) : DataRe
     tryConnect();
 }
 
-void SerialConnector::sendData(Protocol::ProtocolAction action) {
+void SerialConnector::sendData(SerialProtocol::SerialProtocolAction action) {
     qDebug() << Q_FUNC_INFO;
 
     /*
@@ -36,7 +36,7 @@ void SerialConnector::sendData(Protocol::ProtocolAction action) {
         qWarning() << "Cannot write to serial port";
     }*/
 
-    QByteArray data = Protocol::serializeAction(action).toLatin1();
+    QByteArray data = SerialProtocol::serializeAction(action).toLatin1();
     if (!m_handler.write(data)) {
         qWarning() << "Cannot write to serial port";
     }
@@ -104,7 +104,7 @@ void SerialConnector::onDataReceived(QByteArray data) {
     while(it.hasNext()) {
         QByteArray buff = it.next();
 
-        Protocol::ProtocolAction action = Protocol::parseMessage(Protocol::SENDER_ARDUINO_SERIAL, buff);
+        SerialProtocol::SerialProtocolAction action = SerialProtocol::parseMessage(SerialProtocol::SENDER_ARDUINO_SERIAL, buff);
         if (action.isValid) {
             Q_EMIT(dataReceived(action));
         } else {

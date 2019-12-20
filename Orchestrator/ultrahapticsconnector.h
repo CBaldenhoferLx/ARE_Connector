@@ -30,7 +30,9 @@ public:
 
     void setButtonStrength(quint8 strength);
 
-    void sendData(Protocol::ProtocolAction action);
+    void setScanEnabled(bool enabled);
+
+    void sendData(SerialProtocol::SerialProtocolAction action);
 
     static void UltrahapticsConnector::my_emitter_callback(const Ultrahaptics::TimePointStreaming::Emitter &timepoint_emitter,
                              Ultrahaptics::TimePointStreaming::OutputInterval &interval,
@@ -211,6 +213,7 @@ private:
     QFuture<void> m_future;
 
     quint8 m_buttonStrength = BUTTON_STRENGTH_FULL;
+    bool m_scanEnabled = false;
 
 
 private slots:

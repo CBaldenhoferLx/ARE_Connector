@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
     KeyFilter kvt;
     kvt.start();
 
-    orch.addReceiver(Protocol::SENDER_ML_UDP, &udpConn);
-    orch.addReceiver(Protocol::SENDER_ARDUINO_SERIAL, &serialConn);
-    orch.addReceiver(Protocol::SENDER_UL_LIB, &uhConn);
+    orch.addReceiver(SerialProtocol::SENDER_ML_UDP, &udpConn);
+    orch.addReceiver(SerialProtocol::SENDER_ARDUINO_SERIAL, &serialConn);
+    orch.addReceiver(SerialProtocol::SENDER_UL_LIB, &uhConn);
 
     QObject::connect(&kvt, &KeyFilter::keyPressed, [&orch](unsigned long key) {
         orch.handleKeyPressed(key);

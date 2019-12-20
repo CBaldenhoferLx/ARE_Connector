@@ -13,7 +13,7 @@ class UDPConnector : public DataReceiver
 public:
     explicit UDPConnector(AppConfig *appConfig, QObject *parent = nullptr);
 
-    void sendData(Protocol::ProtocolAction action);
+    void sendData(SerialProtocol::SerialProtocolAction action);
 
     void initSocket();
 

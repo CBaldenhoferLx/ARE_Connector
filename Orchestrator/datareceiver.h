@@ -11,10 +11,10 @@ class DataReceiver : public QObject
 public:
     DataReceiver(QObject *parent) :QObject (parent) {}
 
-    virtual void sendData(Protocol::ProtocolAction action) = 0;
+    virtual void sendData(SerialProtocol::SerialProtocolAction action) = 0;
 
 signals:
-    void dataReceived(Protocol::ProtocolAction action);
+    void dataReceived(SerialProtocol::SerialProtocolAction action);
 
 };
 

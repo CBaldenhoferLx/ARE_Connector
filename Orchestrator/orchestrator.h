@@ -13,7 +13,7 @@ class Orchestrator : public QObject
 public:
     explicit Orchestrator(QObject *parent = nullptr);
 
-    void addReceiver(Protocol::Senders sender, DataReceiver *receiver);
+    void addReceiver(SerialProtocol::Senders sender, DataReceiver *receiver);
 
     void handleKeyPressed(unsigned long key);
 
@@ -22,12 +22,12 @@ signals:
 public slots:
 
 private slots:
-    void onDataReceived(Protocol::ProtocolAction action);
+    void onDataReceived(SerialProtocol::SerialProtocolAction action);
 
 private:
-    void redirectMessage(Protocol::Senders receiver, Protocol::ProtocolAction action);
+    void redirectMessage(SerialProtocol::Senders receiver, SerialProtocol::SerialProtocolAction action);
 
-    QMap<Protocol::Senders, DataReceiver*> m_Receivers;
+    QMap<SerialProtocol::Senders, DataReceiver*> m_Receivers;
 
 };
 

@@ -15,7 +15,7 @@ class SerialConnector : public DataReceiver
 public:
     explicit SerialConnector(AppConfig *appConfig, QObject *parent = nullptr);
 
-    void sendData(Protocol::ProtocolAction action);
+    void sendData(SerialProtocol::SerialProtocolAction action);
 
 private:
     //QSerialPort m_port;
