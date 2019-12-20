@@ -20,9 +20,9 @@ public:
   void setSpeed(uint8_t motorIndex, uint8_t speed);
 
 private:
-  //Adafruit_MotorShield *motorShield;
 
-  AF_DCMotor *fans[FAN_MOTOR_COUNT];
+  void _setSpeed(uint8_t motorIndex, uint8_t speed);  
+  
 
 };
 

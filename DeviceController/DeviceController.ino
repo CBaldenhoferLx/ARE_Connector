@@ -3,22 +3,24 @@
 
 #include "FanController.h"
 #include "CommController.h"
-#include "TouchController.h"
+//#include "TouchController.h"
 
 TaskManager taskManager;
 
 FanController fanController;
 CommController commController;
-TouchController touchController;
+//TouchController touchController;
 
 void setup() {
   //LOG_INIT();
 
   taskManager.registerTask(&commController);
   taskManager.registerTask(&fanController);
-  taskManager.registerTask(&touchController);
+  //taskManager.registerTask(&touchController);
   
   taskManager.init();
+
+  LOG_PRINTLN("INIT");
 }
 
 void loop() {
