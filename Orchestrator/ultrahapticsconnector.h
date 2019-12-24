@@ -8,6 +8,7 @@
 #include <UltrahapticsAmplitudeModulation.hpp>
 
 #include <LeapC++.h>
+#include <atomic>
 
 #include "datareceiver.h"
 
@@ -34,30 +35,33 @@ public:
 
     void sendData(SerialProtocol::SerialProtocolAction action);
 
-    static void UltrahapticsConnector::my_emitter_callback(const Ultrahaptics::TimePointStreaming::Emitter &timepoint_emitter,
+    static void circle_emitter_callback(const Ultrahaptics::TimePointStreaming::Emitter &timepoint_emitter,
                              Ultrahaptics::TimePointStreaming::OutputInterval &interval,
                              const Ultrahaptics::HostTimePoint &submission_deadline,
                              void *user_pointer);
 
+    static void hand_scan_emitter_callback(const Ultrahaptics::TimePointStreaming::Emitter &timepoint_emitter,
+                             Ultrahaptics::TimePointStreaming::OutputInterval &interval,
+                             const Ultrahaptics::HostTimePoint &submission_deadline,
+                             void *user_pointer);
 
     struct Circle
     {
         // The position of the control point
-        Ultrahaptics::Vector3 position;
+        Ultrahaptics::Vector3 position = Ultrahaptics::Vector3(0, 0, 0);
 
         Ultrahaptics::Vector3 offset;
 
         // The intensity of the control point
-        float intensity;
+        float intensity = 1.0f;
 
         // The radius of the circle
-        float radius;
+        float radius = 2.0f * Ultrahaptics::Units::centimetres;
 
         // The frequency at which the control point goes around the circle
-        float frequency;
+        float frequency = 100.f;
 
         bool enable;
-
 
         const Ultrahaptics::Vector3 evaluateAt(Seconds t){
             // Calculate the x and y positions of the circle and set the height
@@ -70,150 +74,138 @@ public:
     // Structure to represent output from the Leap listener
     struct LeapOutput
     {
-        LeapOutput() noexcept
-        {}
-
-        Ultrahaptics::Vector3 p1;
-        Ultrahaptics::Vector3 p2;
-
-        Ultrahaptics::Vector3 palm_position;
-
-        bool hand_present = false;
+      Ultrahaptics::Vector3 palm_position;
+      Ultrahaptics::Vector3 x_axis;
+      bool hand_present;
     };
-
 
     // Leap listener class - tracking the hand position and creating data structure for use by Ultrahaptics API
     class LeapListening : public Leap::Listener
     {
-    public:
-        LeapListening(const Ultrahaptics::Alignment& align, UltrahapticsConnector* c)
-          : alignment(align), conn(c)
+      public:
+        LeapListening()
+          : current_update(0),
+          atomic_local_hand_data(local_hand_data[0])
         {
+          current_update++;
         }
-
-        ~LeapListening() = default;
 
         LeapListening(const LeapListening &other) = delete;
-        LeapListening &operator=(const LeapListening &other) = delete;
+        LeapListening& operator=(const LeapListening &other) = delete;
 
-        void onFrame(const Leap::Controller &controller) override
+        void onFrame(const Leap::Controller & controller)
         {
-            // Get all the hand positions from the leap and position a focal point on each.
-            LeapOutput local_hand_data;
+          // Get all the hand positions from the leap and position a focal point on each.
+          const Leap::Frame    frame = controller.frame();
+          const Leap::HandList hands = frame.hands();
 
-            if (conn->m_buttonStrength!=BUTTON_STRENGTH_OFF && controller.frame().hands().isEmpty()) {
-                local_hand_data.palm_position = Ultrahaptics::Vector3();
-                local_hand_data.p1 = Ultrahaptics::Vector3();
-                local_hand_data.p2 = Ultrahaptics::Vector3();
-                local_hand_data.hand_present = false;
-            } else {
-                Leap::FingerList theFingers = controller.frame().hands().frontmost().fingers().extended();
-                Leap::Finger indexFinger;
+          if (hands.isEmpty()) {
+            local_hand_data[current_update & 1].palm_position = Ultrahaptics::Vector3();
+            local_hand_data[current_update & 1].x_axis = Ultrahaptics::Vector3();
+            local_hand_data[current_update & 1].hand_present = false;
+            atomic_local_hand_data.store(local_hand_data[current_update & 1]);
+            current_update++;
 
-                for(Leap::FingerList::const_iterator fl = theFingers.begin(); fl != theFingers.end(); fl++) {
-                    const Leap::Finger finger = *fl;
-                    if (finger.type()==Leap::Finger::Type::TYPE_INDEX) {
-                        qDebug() << "Index finger found";
-                        indexFinger = finger;
-                        break;
-                    }
-                }
+          } else {
+            const Leap::Hand & hand = hands[0];
 
-                if (indexFinger.isValid()) {
+            // Translate the hand position from leap objects to Ultrahaptics objects.
+            const Leap::Vector & leap_palm_position  = hand.palmPosition();
+            const Leap::Vector & leap_palm_normal    = hand.palmNormal();
+            const Leap::Vector & leap_palm_direction = hand.direction();
 
-                } else {
-                    local_hand_data.palm_position = Ultrahaptics::Vector3();
-                    local_hand_data.p1 = Ultrahaptics::Vector3();
-                    local_hand_data.p2 = Ultrahaptics::Vector3();
-                    local_hand_data.hand_present = false;
-                }
+            // Convert to Ultrahaptics vectors, normal is negated as leap normal points down.
+            const Ultrahaptics::Vector3 uh_palm_position  = +Ultrahaptics::Vector3(leap_palm_position.x,  leap_palm_position.y,  leap_palm_position.z);
+            const Ultrahaptics::Vector3 uh_palm_normal    = -Ultrahaptics::Vector3(leap_palm_normal.x,    leap_palm_normal.y,    leap_palm_normal.z);
+            const Ultrahaptics::Vector3 uh_palm_direction = +Ultrahaptics::Vector3(leap_palm_direction.x, leap_palm_direction.y, leap_palm_direction.z);
 
+            // Convert from leap space to device space.
+            const Ultrahaptics::Vector3 device_palm_position  = alignment.fromTrackingPositionToDevicePosition(uh_palm_position);
+            const Ultrahaptics::Vector3 device_palm_normal    = alignment.fromTrackingDirectionToDeviceDirection(uh_palm_normal).normalize();
+            const Ultrahaptics::Vector3 device_palm_direction = alignment.fromTrackingDirectionToDeviceDirection(uh_palm_direction).normalize();
 
-                // Translate the hand position from leap objects to Ultrahaptics objects.
-                Leap::Vector leap_palm_position = indexFinger.tipPosition();
-                Leap::Vector leap_palm_normal = indexFinger.hand().palmNormal();
-                Leap::Vector leap_palm_direction = indexFinger.hand().direction();
-
-                /*
-                Leap::Vector leap_palm_position = indexFinger.hand().palmPosition();
-                Leap::Vector leap_palm_normal = indexFinger.hand().palmNormal();
-                Leap::Vector leap_palm_direction = indexFinger.hand().direction();
-                */
-
-
-                // Convert to Ultrahaptics vectors, normal is negated as leap normal points down.
-                Ultrahaptics::Vector3 uh_palm_position(leap_palm_position.x, leap_palm_position.y, leap_palm_position.z);
-                Ultrahaptics::Vector3 uh_palm_normal(-leap_palm_normal.x, -leap_palm_normal.y, -leap_palm_normal.z);
-                Ultrahaptics::Vector3 uh_palm_direction(leap_palm_direction.x, leap_palm_direction.y, leap_palm_direction.z);
-
-                // Convert from leap space to device space.
-                Ultrahaptics::Vector3 device_palm_position = alignment.fromTrackingPositionToDevicePosition(uh_palm_position);
-                Ultrahaptics::Vector3 device_palm_normal = alignment.fromTrackingDirectionToDeviceDirection(uh_palm_normal).normalize();
-                Ultrahaptics::Vector3 device_palm_direction = alignment.fromTrackingDirectionToDeviceDirection(uh_palm_direction).normalize();
-
-                Leap::Vector boneV1 = indexFinger.bone(Leap::Bone::Type::TYPE_DISTAL).center();
-                Ultrahaptics::Vector3 bone_pos1(boneV1.x, boneV1.y, boneV1.z);
-                local_hand_data.p1 = alignment.fromTrackingPositionToDevicePosition(bone_pos1);
-
-                Leap::Vector boneV2 = indexFinger.bone(Leap::Bone::Type::TYPE_INTERMEDIATE).center();
-                Ultrahaptics::Vector3 bone_pos2(boneV2.x, boneV2.y, boneV2.z);
-                local_hand_data.p2 = alignment.fromTrackingPositionToDevicePosition(bone_pos2);
-
-                local_hand_data.palm_position = device_palm_position;
-
-                local_hand_data.hand_present = true;
+            // Only respond to the hand when it is roughly in the desired position.
+            // This position should correspond to the 'plate' the user puts the hand into the start the experience
+            if(  device_palm_position.x < (-4.f * Ultrahaptics::Units::cm)
+              || device_palm_position.x > ( 4.f * Ultrahaptics::Units::cm)
+              || device_palm_position.y < (-4.f * Ultrahaptics::Units::cm)
+              || device_palm_position.y > ( 4.f * Ultrahaptics::Units::cm)
+              || device_palm_position.z < (-16.f * Ultrahaptics::Units::cm)
+              || device_palm_position.z > ( 24.f * Ultrahaptics::Units::cm))
+            {
+               local_hand_data[current_update & 1].palm_position = Ultrahaptics::Vector3();
+               local_hand_data[current_update & 1].x_axis = Ultrahaptics::Vector3();
+               local_hand_data[current_update & 1].hand_present = false;
+               atomic_local_hand_data.store(local_hand_data[current_update & 1]);
+               current_update++;
+               return;
             }
-            atomic_local_hand_data.store(local_hand_data);
+
+            // These can then be converted to be a unit axis on the palm of the hand.
+            const Ultrahaptics::Vector3 device_palm_z = device_palm_normal;                             // Unit Z direction.
+            const Ultrahaptics::Vector3 device_palm_y = device_palm_direction;                          // Unit Y direction.
+            const Ultrahaptics::Vector3 device_palm_x = device_palm_y.cross(device_palm_z).normalize(); // Unit X direction.
+
+            local_hand_data[current_update & 1].palm_position = device_palm_position;
+            local_hand_data[current_update & 1].x_axis = device_palm_x;
+            local_hand_data[current_update & 1].hand_present = true;
+            atomic_local_hand_data.store(local_hand_data[current_update & 1]);
+            current_update++;
+          }
         }
 
-        LeapOutput getLeapOutput()
-        {
-            return atomic_local_hand_data.load();
-        }
+        const Ultrahaptics::Vector3 getPalmPosition() { return (atomic_local_hand_data.load()).palm_position; }
+        const Ultrahaptics::Vector3 getXAxis() { return (atomic_local_hand_data.load()).x_axis; }
+        const bool isHandPresent() { return (atomic_local_hand_data.load()).hand_present; }
 
-    private:
+      private:
         std::atomic<LeapOutput> atomic_local_hand_data;
+        LeapOutput local_hand_data[2];
         Ultrahaptics::Alignment alignment;
-
-        UltrahapticsConnector *conn;
+        int current_update;
     };
 
 
-    // Structure for passing information on the type of point to create
-    struct ModulatedPoint
+    struct HandScan
     {
-        // Create the structure, passing the appropriate alignment through to the LeapListening class
-        ModulatedPoint(const Ultrahaptics::Alignment& align, UltrahapticsConnector *c) : hand(align, c)
-        {
-        }
+       // Hand data
+       LeapListening hand;
 
-        // Hand data
-        LeapListening hand;
+       // The position of the control point
+       Ultrahaptics::Vector3 position = Ultrahaptics::Vector3(0, 0, 0);
 
-        // The position of the control point
-        Ultrahaptics::Vector3 position;
+       // The intensity of the control point
+       float intensity = 1.f;
 
-        // The length of the lines to draw
-        double line_length;
+       // The width and height of the scan area
+       float forcefield_width = 8.f * Ultrahaptics::Units::centimetres;
+       float forcefield_height = 12.f * Ultrahaptics::Units::centimetres;
 
-        // How often the line is drawn every second
-        double line_draw_frequency;
+       // The frequency of forcefield update. Y = one vertical 'scan' takes 1.5 seconds
+       float forcefield_frequency_x = 80.f;
+       float forcefield_frequency_y = 1.5f;
 
-        // The offset of the control point at the last sample time
-        double offset = 0.0f;
+       // The offset of the control point at the last sample time
+       float previous_sample_offset_x;
+       float previous_sample_offset_y;
 
-        // This allows us to easily reverse the direction of the point
-        // It can be -1 or 1.
-        int direction = 1;
+       // Is this the initial interval?
+       bool is_initial_interval = true;
+
+       // This allows us to easily reverse the direction of the point
+       bool direction_x = true;
+       bool direction_y = true;
     };
-
 
 
 private:
     QFuture<void> m_future;
 
     quint8 m_buttonStrength = BUTTON_STRENGTH_FULL;
-    bool m_scanEnabled = false;
+    bool m_scanEnabled = true;
+    Ultrahaptics::TimePointStreaming::Emitter *m_emitter;
+    HandScan m_hand_scan_data;
+    Circle m_circle_data;
 
 
 private slots:
