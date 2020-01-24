@@ -25,10 +25,16 @@ void UltrahapticsConnector::sendData(SerialProtocol::SerialProtocolAction action
     qDebug() << Q_FUNC_INFO << action.action;
 
     switch(action.action) {
-    case SerialProtocol::ACTION_TOUCH_TRIGGERED:
+    case SerialProtocol::ACTION_TOUCH_TRIGGERED: {
         double v = qBound(BUTTON_STRENGTH_OFF, action.param, BUTTON_STRENGTH_FULL);
         m_buttonStrength = v;
         break;
+    }
+    case SerialProtocol::ACTION_SCAN_ENABLED: {
+        bool b = action.param==1.0;
+        setScanEnabled(b);
+        break;
+    }
     }
 }
 

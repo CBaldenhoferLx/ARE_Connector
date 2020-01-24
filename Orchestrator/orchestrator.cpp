@@ -64,6 +64,8 @@ void Orchestrator::onDataReceived(SerialProtocol::SerialProtocolAction action) {
 }
 
 void Orchestrator::redirectMessage(SerialProtocol::Senders receiver, SerialProtocol::SerialProtocolAction action) {
+    qDebug() << Q_FUNC_INFO << action.action << action.param;
+
     if (m_Receivers.contains(receiver)) {
         m_Receivers.value(receiver)->sendData(action);
     } else {
